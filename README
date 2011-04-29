@@ -1,0 +1,19 @@
+A quick and dirty fork/extension of http://github.com/runpaint/natwest for use with other credit institutions.
+
+You can dump your credentials into the accounts.yml so you don't have to type it in each time, if you think your machine is secure enough ;)
+
+Format:
+
+:egg:
+  :first_name: "Bob"
+  :last_name: "Example"
+  :dob_day: "18"
+  :dob_month: "1"
+  :dob_year: "1977"
+  :postcode: "EC9 1SD"
+  :mmn: "Smith"
+  :password: "supersecret"
+:natwest:
+  :customer_number: "1801774421"
+  :pin: "5142"
+  :password: "supersecret"

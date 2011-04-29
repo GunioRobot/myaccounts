@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'natwest'
+require 'egg'
+require 'highline/import'
+
+CONFIG = File.expand_path("/Users/theorician/documents/code/play/myaccounts/accounts.yml")
+
+if File.exists?(CONFIG) 
+ # if FileTest.world_readable?(CONFIG) or not File.owned?(CONFIG) # ruby 1.9.2
+    mode = File.stat(CONFIG).mode.to_s(8)
+    $stderr.puts "#{CONFIG}: Insecure permissions: #{mode}"
+ # end
+end
+
+credentials = YAML.load(File.read(CONFIG)) rescue {}
+
+puts "About to log into your Natwest account"
+['customer number', 'PIN', 'password'].each do |credential|
+  key = credential.tr(' ','_').downcase.to_sym
+  next if credentials[:natwest].key?(key)
+  unless $stdin.tty? and $stdout.tty?
+    $stderr.puts "Can't prompt for credentials; STDIN or STDOUT is not a TTY"
+    exit(1)
+  end
+  credentials[:natwest][key] = ask("Please enter your #{credential}:") do |q| 
+    q.echo = false
+  end
+end
+
+puts "About to log into your Egg account"
+['first name', 'last name', 'dob day', 'dob month', 'dob year', 'postcode', 'mmn', 'password'].each do |credential|
+  key = credential.tr(' ','_').downcase.to_sym
+  next if credentials[:egg].key?(key)
+  unless $stdin.tty? and $stdout.tty?
+    $stderr.puts "Can't prompt for credentials; STDIN or STDOUT is not a TTY"
+    exit(1)
+  end
+  credentials[:egg][key] = ask("Please enter your #{credential}:") do |q| 
+    q.echo = false
+  end
+end
+
+Natwest::Customer.new.tap do |nw|
+  nw.login credentials[:natwest]
+  nw.accounts.each do |acc|
+    puts '###'
+    puts "#{acc.name} [#{acc.number}; #{acc.sort_code}] " +
+       "balance: #{acc.balance}; available: #{acc.available}"
+    puts "\nRecent Transactions:"
+    acc.transactions.each do |trans|
+      amount = trans[:credit] ? "+#{trans[:credit]}" : "-#{trans[:debit]}"
+      puts "#{trans[:date]}: #{amount}"
+      puts "\t" + trans[:details]
+    end
+    puts
+  end
+end
+
+Egg::Customer.new.tap do |egg|
+  egg.login credentials[:egg]
+  egg.accounts.each do |acc|
+    puts '###'
+    puts "#{acc.name} [#{acc.number}; #{acc.sort_code}] " +
+       "balance: #{acc.balance}; available: #{acc.available}"
+    puts
+  end
+end
