@@ -4,13 +4,13 @@ require 'natwest'
 require 'egg'
 require 'highline/import'
 
-CONFIG = File.expand_path("/Users/theorician/documents/code/play/myaccounts/accounts.yml")
+CONFIG = File.join(File.dirname(__FILE__), "..", "accounts.yml")
 
 if File.exists?(CONFIG) 
- # if FileTest.world_readable?(CONFIG) or not File.owned?(CONFIG) # ruby 1.9.2
+  if FileTest.world_readable?(CONFIG) or not File.owned?(CONFIG) # ruby 1.9.2
     mode = File.stat(CONFIG).mode.to_s(8)
     $stderr.puts "#{CONFIG}: Insecure permissions: #{mode}"
- # end
+  end
 end
 
 credentials = YAML.load(File.read(CONFIG)) rescue {}
