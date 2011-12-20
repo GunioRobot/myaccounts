@@ -37,7 +37,7 @@ module Egg
     def initialize
       @ua = Mechanize.new {|ua| ua.user_agent_alias = 'Windows IE 7'}
     end
-  
+
     def accounts
       accounts = []
       page.parser.xpath('//table[@id="tblAccounts"]//tr[@class="rowVisible"]').each do |table|
@@ -55,8 +55,8 @@ module Egg
       accounts
     end
   end
-  
-  class Account 
+
+  class Account
     attr_accessor :name, :number, :sort_code, :balance, :available, :transactions
   end
 end
